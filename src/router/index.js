@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PortalVue from 'portal-vue'
+
 import routes from './routes'
 import { getToken } from '../utils/auth'
 import { Store } from '../store'
 
 Vue.use(VueRouter)
-Vue.use(PortalVue)
+
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
