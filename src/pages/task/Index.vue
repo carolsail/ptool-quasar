@@ -1,62 +1,26 @@
 <template>
   <Task>
     <q-scroll-area slot="drawer" class="fit">
-      <div class="q-pa-md">
-        <q-timeline color="secondary">
-            <q-timeline-entry heading>00:00:50</q-timeline-entry>
-
-            <q-timeline-entry title="17:46" subtitle="2020-04-01" icon="play_arrow">
-            <div>start...</div>
-            </q-timeline-entry>
-
-            <q-timeline-entry title="17:46" subtitle="2020-04-01" icon="pause">
-            <div>pause...</div>
-            </q-timeline-entry>
-
-            <q-timeline-entry title="17:46" subtitle="2020-04-01" icon="flag">
-            <div>over...</div>
-            </q-timeline-entry>
-        </q-timeline>
+      <div class="q-pa-md task-timer">
+        <TaskTimerline />
       </div>
     </q-scroll-area> 
 
     <div slot="main" class="q-pa-md">
-      <div class="q-gutter-xs row items-start q-mb-sm">
-        <q-select
-          dense
-          v-model="task.category"
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="500"
-          label="Category"
-          :options="categories"
-          @filter="getCategories"
-          style="width: 150px"
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                No results
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-
-        <q-input dense v-model="task.deadline" mask="date" style="width: 150px" readonly>
-          <template v-slot:prepend>
-            <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                <q-date v-model="task.deadline" @input="() => $refs.qDateProxy.hide()" />
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
-
-        <q-input dense v-model="task.title" label="Title" style="min-width: 200px" />
-        
-        <q-btn icon="add" type="submit" color="primary"/>
-        <q-btn icon="redo" type="reset" color="grey" />
+      <div class="row q-col-gutter-xs q-mb-sm">
+        <div class="col-6 col-md-3">
+          <AutoCompleteCategories v-model="task.category" :dense="true" />
+        </div>
+        <div class="col-6 col-md-3">
+          <DatePicker v-model="task.deadline" :label="'Deadline'" :dense="true"  :options="true" />
+        </div>
+        <div class="col-12 col-md-6">
+          <q-input clearable dense outlined v-model="task.title" label="Title" @keyup.enter.native="addTask">
+            <template v-slot:after>
+              <q-btn outline type="submit" color="primary" label="Add Task" @click="addTask" />
+            </template>
+          </q-input>
+        </div>
       </div>
 
       <q-table
@@ -71,23 +35,40 @@
         binary-state-sort
       >
         <template v-slot:top>
-          <q-select
-            v-if="$q.screen.gt.xs"
-            v-model="filter.status"
-            multiple
-            borderless
-            dense
-            options-dense
-            :options="status"
-            label="Status select"
-            style="min-width: 210px"
-          />
-          <q-space />
-          <q-input clearable borderless dense debounce="300" v-model="filter.title" placeholder="Search">
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
+          <div class="col-12 col-sm col-md-4">
+            <q-select
+                v-if="$q.screen.gt.sm"
+                v-model="filter.status"
+                multiple
+                borderless
+                dense
+                options-dense
+                :options="status"
+                label="Status select"
+              />
+          </div>
+          
+          <div class="col-12 col-sm col-md-4 offset-md-4">
+            <q-input borderless dense debounce="300" v-model="filter.title" placeholder="Search">
+              <template v-slot:append>
+                <q-icon name="cancel" v-if="filter.title" @click="filter.title = ''"/>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </template>
+
+        <template v-slot:header="props">
+          <span v-if="!$q.screen.gt.sm"></span>
+          <q-tr v-else :props="props">
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
         </template>
 
         <template v-slot:body="props">
@@ -95,12 +76,12 @@
             <q-td key="is_urgent" :props="props" style='width:20px;'>
               <q-icon class="cursor-pointer" size="md" name="star" :color="props.row.is_urgent ? 'red' : 'grey'" @click="changeUrgent(props.row)" />
             </q-td>
-            <q-td key="create_time" :props="props">
+            <q-td class="cursor-pointer" key="create_time" :props="props" @click="$root.$emit('modalUpdateTaskOpen', props.row)">
               <q-item>
                 <q-item-section>
                   <q-item-label>{{ props.row.title }}</q-item-label>
                   <q-item-label caption lines="2">
-                    <span class="text-positive">{{ props.row.create_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+                    <span class="text-positive">{{ props.row.create_time | parseTime('{y}-{m}-{d}') }}</span>
                   </q-item-label>
                   <q-item-label caption lines="2">
                     <span class="text-negative">{{ props.row.deadline | parseTime('{y}-{m}-{d}') }}</span>
@@ -115,19 +96,27 @@
             </q-td>
             <q-td key="action" :props="props" style='width:20px;'>
               <div class="q-gutter-sm">
-                <q-btn round color="black" size="md" icon="play_arrow" />
+                <q-btn round color="black" size="md" icon="play_arrow" @click.stop="$root.$emit('timerStart', props.row)" />
                 <q-btn round color="secondary" size="md" icon="done" />
               </div>
             </q-td>
           </q-tr>
         </template>
       </q-table>
+
+      <ModalTaskItem />
     </div>
   </Task>
 </template>
 
 <script>
-import Task from 'components/Task'
+import _ from 'lodash'
+import Task from 'components/task/Task'
+import ModalTaskItem from 'components/task/ModalTaskItem'
+import AutoCompleteCategories from 'src/components/task/AutoCompleteCategories'
+import DatePicker from 'src/components/DatePicker'
+import TaskTimerline from 'src/components/task/TaskTimeline'
+
 export default {
   name: 'PageTaskIndex',
   data(){
@@ -137,11 +126,10 @@ export default {
         status: ['undo', 'pending', 'paused']
       },
       status: ['undo', 'pending', 'paused', 'done'],
-      categories: [],
       loading: false,
       pagination: {
         sortBy: 'create_time',
-        descending: false,
+        descending: true,
         page: 1,
         rowsPerPage: 3,
         rowsNumber: 10
@@ -160,19 +148,22 @@ export default {
     }
   },
   components: {
-    Task
+    Task,
+    ModalTaskItem,
+    AutoCompleteCategories,
+    DatePicker,
+    TaskTimerline
   },
   mounted(){
-    // get initial data from server (1st page)
-    this.onRequest({
-      pagination: this.pagination,
-      filter: this.filter
+    this.$root.$on('reloadRequest', ()=>{
+      this.onRequest()
     })
+    this.onRequest()
   },
   methods: {
-    async onRequest(props){
-      const { page, rowsPerPage, sortBy, descending } = props.pagination
-      const filter = props.filter
+    async onRequest(props={}) {
+      const { page, rowsPerPage, sortBy, descending } = props.pagination || this.pagination 
+      const filter = props.filter || this.filter
       const startRow = (page - 1) * rowsPerPage
       this.loading = true
       const res = await this.$axios.post('task/items', {startRow, rowsPerPage, sortBy, descending, filter})
@@ -185,7 +176,7 @@ export default {
       this.pagination.descending = descending
       this.loading = false
     },
-    async changeUrgent(row){
+    async changeUrgent(row) {
       const index = this.data.indexOf(row)
       const id = row['id']
       const is_urgent = row['is_urgent'] == 0 ? 1 : 0
@@ -194,21 +185,50 @@ export default {
       this.$set(this.data[index], 'is_urgent', is_urgent)
       this.$q.loading.hide()
     },
-    getCategories(val, update, abort) {
-
-
-      update(async() => {
-        if(val === ''){
-          const res = await this.$axios.post('task/categories')
-          console.log(res)
-          this.categories = res.data
+    async addTask() {
+      // 判断deadline是否合法
+      if(this.task.deadline != ''){
+        if(!(/^-?[\d]+\/[0-1]\d\/[0-3]\d$/.test(this.task.deadline))){
+          this.$q.notify({
+              color: 'negative',
+              position: 'top-right',
+              message: 'Deadline incorrect',
+              actions: [
+                  { label: 'x', color: 'white', handler: () => {} }
+              ]
+          })
+          return
         }
-        else {
-          const needle = val.toLowerCase()
-          this.categories = this.categories.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      }
+      // 判断title是否存在
+      if(!this.task.title){
+        this.$q.notify({
+            color: 'negative',
+            position: 'top-right',
+            message: 'Title is empty',
+            actions: [
+                { label: 'x', color: 'white', handler: () => {} }
+            ]
+        })
+        return
+      }
+      const res = await this.$axios.post('task/item/add', this.task)
+      if(res.status){
+        this.$q.notify({
+            color: 'positive',
+            position: 'top-right',
+            message: res.data,
+            actions: [
+                { label: 'x', color: 'white', handler: () => {} }
+            ]
+        })
+        this.task = {
+          title: '',
+          deadline: '',
+          category: ''
         }
-
-      })
+        this.onRequest()
+      }
     }
   }
 }

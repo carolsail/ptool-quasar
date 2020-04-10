@@ -1,1 +1,1 @@
-export { parseTime, formatTime } from '../utils/time'
+export * from '../utils/time'

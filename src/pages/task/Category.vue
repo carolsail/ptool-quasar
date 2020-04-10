@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import Task from 'components/Task'
+import Task from 'components/task/Task'
 export default {
   name: 'PageTaskCategory',
   components: {
