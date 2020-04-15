@@ -18,7 +18,7 @@
             </q-footer>
         </portal>
 
-        <q-drawer side="right" show-if-above>
+        <q-drawer side="right" class="rightDrawer" show-if-above>
             <slot name="drawer" />
         </q-drawer>
 
@@ -33,3 +33,9 @@ export default {
   name: 'Task'
 }
 </script>
+
+<style>
+.rightDrawer .q-drawer {
+    position: fixed;
+}
+</style>

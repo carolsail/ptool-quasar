@@ -39,7 +39,7 @@ axiosInstance.interceptors.response.use(response=>{
                 position: 'top-right',
                 message: res.data,
                 actions: [
-                    { label: 'x', color: 'white', handler: () => {} }
+                    { icon: 'close', color: 'white', handler: () => {} }
                 ]
             })
         }

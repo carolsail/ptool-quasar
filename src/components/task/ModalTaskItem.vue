@@ -52,7 +52,7 @@ export default {
     DatePicker
   },
   created() {
-    this.$root.$on('modalUpdateTaskOpen', (data)=>{
+    this.$root.$on('modalTaskItemOpen', (data)=>{
       this.isOpen = !this.isOpen
       this.title = this.task.title = data.title
       this.task.deadline = parseTime(data.deadline, '{y}/{m}/{d}')

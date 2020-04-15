@@ -76,7 +76,7 @@
             <q-td key="is_urgent" :props="props" style='width:20px;'>
               <q-icon class="cursor-pointer" size="md" name="star" :color="props.row.is_urgent ? 'red' : 'grey'" @click="changeUrgent(props.row)" />
             </q-td>
-            <q-td class="cursor-pointer" key="create_time" :props="props" @click="$root.$emit('modalUpdateTaskOpen', props.row)">
+            <q-td class="cursor-pointer" key="create_time" :props="props" @click="$root.$emit('modalTaskItemOpen', props.row)">
               <q-item>
                 <q-item-section>
                   <q-item-label>{{ props.row.title }}</q-item-label>
@@ -95,9 +95,18 @@
               </q-item>
             </q-td>
             <q-td key="action" :props="props" style='width:20px;'>
-              <div class="q-gutter-sm">
-                <q-btn round color="black" size="md" icon="play_arrow" @click.stop="$root.$emit('timerStart', props.row)" />
-                <q-btn round color="secondary" size="md" icon="done" />
+              <div class="q-gutter-sm" v-if="props.row.status === 1">
+                <q-btn round color="black" size="sm" icon="play_arrow" @click.stop="$root.$emit('modalTimerAddOpen', props.row)" />
+              </div>
+              
+              <div class="q-gutter-sm" v-else-if="props.row.status === 2">
+                <q-btn round color="black" size="sm" icon="pause" @click.stop="$root.$emit('modalTimerAddOpen', props.row)" />
+                <q-btn round color="secondary" size="sm" icon="done" />
+              </div>
+
+              <div class="q-gutter-sm" v-else-if="props.row.status === 3">
+                <q-btn round color="black" size="sm" icon="play_arrow" @click.stop="$root.$emit('modalTimerAddOpen', props.row)" />
+                <q-btn round color="secondary" size="sm" icon="done" />
               </div>
             </q-td>
           </q-tr>
@@ -105,6 +114,7 @@
       </q-table>
 
       <ModalTaskItem />
+      <ModalTimerAdd />
     </div>
   </Task>
 </template>
@@ -113,6 +123,7 @@
 import _ from 'lodash'
 import Task from 'components/task/Task'
 import ModalTaskItem from 'components/task/ModalTaskItem'
+import ModalTimerAdd from 'components/task/ModalTimerAdd'
 import AutoCompleteCategories from 'src/components/task/AutoCompleteCategories'
 import DatePicker from 'src/components/DatePicker'
 import TaskTimerline from 'src/components/task/TaskTimeline'
@@ -150,6 +161,7 @@ export default {
   components: {
     Task,
     ModalTaskItem,
+    ModalTimerAdd,
     AutoCompleteCategories,
     DatePicker,
     TaskTimerline
@@ -194,7 +206,7 @@ export default {
               position: 'top-right',
               message: 'Deadline incorrect',
               actions: [
-                  { label: 'x', color: 'white', handler: () => {} }
+                  { icon: 'close', color: 'white', handler: () => {} }
               ]
           })
           return
@@ -207,7 +219,7 @@ export default {
             position: 'top-right',
             message: 'Title is empty',
             actions: [
-                { label: 'x', color: 'white', handler: () => {} }
+                { icon: 'close', color: 'white', handler: () => {} }
             ]
         })
         return
@@ -219,7 +231,7 @@ export default {
             position: 'top-right',
             message: res.data,
             actions: [
-                { label: 'x', color: 'white', handler: () => {} }
+                { icon: 'close', color: 'white', handler: () => {} }
             ]
         })
         this.task = {
@@ -234,7 +246,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style >
 .status_1 {
   background: grey;
 }
