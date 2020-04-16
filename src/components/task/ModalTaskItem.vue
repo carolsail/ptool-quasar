@@ -22,7 +22,7 @@
         <q-card-actions>
           <q-btn flat label="Delete" color="negative" @click="deleteTask" />
            <q-space />
-          <q-btn label="Save" color="primary" @click="upateTask" />
+          <q-btn flat label="Save" color="primary" @click="upateTask" />
         </q-card-actions>
       </q-card>
     </q-dialog>

@@ -27,12 +27,13 @@ export default {
     data(){
         return {
             counting: false,
-            seconds: 5
+            seconds: 0,
+            timelines: []
         }
     },
     created(){
         this.$root.$on('timerStart', (obj)=>{
-            console.log(obj)
+            this.seconds = obj.seconds
             this.start()
         })
         this.$root.$on('timerPause', (obj)=>{
