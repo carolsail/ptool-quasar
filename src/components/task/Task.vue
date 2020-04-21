@@ -3,7 +3,7 @@
         <portal to="header">
             <q-header elevated>
                 <q-toolbar>
-                    <q-btn flat round dense icon="menu" @click="$root.$emit('toggleDrawer')" />
+                    <q-btn flat round dense icon="menu" @click="$root.$emit('toggleLeftDrawer')" />
                     <q-toolbar-title>Tasks</q-toolbar-title>
                 </q-toolbar>
             </q-header>
@@ -18,7 +18,7 @@
             </q-footer>
         </portal>
 
-        <q-drawer side="right" class="rightDrawer" show-if-above>
+        <q-drawer side="right" class="rightDrawer" v-model="rightDrawerOpen" show-if-above>
             <slot name="drawer" />
         </q-drawer>
 
@@ -30,7 +30,17 @@
 
 <script>
 export default {
-  name: 'Task'
+  name: 'Task',
+  data(){
+      return {
+          rightDrawerOpen: false
+      }
+  },
+  created(){
+    this.$root.$on('toggleRightDrawer', ()=>{
+      this.rightDrawerOpen = true
+    })
+  }
 }
 </script>
 

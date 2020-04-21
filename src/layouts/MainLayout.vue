@@ -50,7 +50,7 @@ export default {
     }
   },
   created() {
-    this.$root.$on('toggleDrawer', ()=>{
+    this.$root.$on('toggleLeftDrawer', ()=>{
       this.leftDrawerOpen = !this.leftDrawerOpen
     })
   }

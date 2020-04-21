@@ -31,8 +31,10 @@
               <q-input outlined clearable label="remark" v-model="timer.remark" />
             </div>
           </div>
-          <div v-else>
-            Are you completed the task?
+          <div class="q-col-gutter-md row" v-else>
+            <div class="col-12">
+              <q-input outlined clearable label="remark" v-model="timer.remark" />
+            </div>
           </div>
         </q-card-section>
 
@@ -102,6 +104,13 @@ export default {
               ]
           })
           this.isOpen = !this.isOpen
+          this.timer = {
+              item: null,
+              type: null,
+              hours: null,
+              minutes: null,
+              remark: null
+          }
           this.$root.$emit('reloadRequest', {pagination:{page:1}})
         }
       }

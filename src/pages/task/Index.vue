@@ -49,9 +49,9 @@
           </div>
           
           <div class="col-12 col-sm col-md-4 offset-md-4">
-            <q-input borderless dense debounce="300" v-model="filter.title" placeholder="Search">
+            <q-input borderless dense debounce="300" v-model="filter.title" placeholder="title...">
               <template v-slot:append>
-                <q-icon name="cancel" v-if="filter.title" @click="filter.title = ''"/>
+                <q-icon class="cursor-pointer" name="cancel" v-if="filter.title" @click="filter.title = ''"/>
                 <q-icon name="search" />
               </template>
             </q-input>
@@ -72,11 +72,11 @@
         </template>
 
         <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="is_urgent" :props="props" style='width:20px;' v-if="$q.screen.gt.xs">
-              <q-icon class="cursor-pointer" size="md" name="star" :color="props.row.is_urgent ? 'red' : 'grey'" @click="changeUrgent(props.row)" />
+          <q-tr :props="props" :class="{'tr_current_highlight': timer && props.row.id == timer.item_id}">
+            <q-td key="is_urgent" :props="props" v-if="$q.screen.gt.xs" style='width:20px;'>
+              <q-icon size="md" name="star" :class="['cursor-pointer', props.row.is_urgent ? 'text-negative' : 'text-grey']" @click="changeUrgent(props.row)" />
             </q-td>
-            <q-td key="create_time" :props="props" @click="$root.$emit('modalTaskItemOpen', props.row)" class="cursor-pointer">
+            <q-td key="update_time" :props="props" @click="$root.$emit('modalTaskItemOpen', props.row)" class="cursor-pointer">
               <q-item>
                 <q-item-section>
                   <q-item-label class="overlflow" style="width:100px;">{{ props.row.title }}</q-item-label>
@@ -88,7 +88,7 @@
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-icon size='xs' color="grey" name="edit" />
+                  <q-icon size='xs' name="edit" class='text-grey' />
                 </q-item-section>
               </q-item>
             </q-td>
@@ -96,7 +96,7 @@
               <q-badge :class="'status_'+props.row.status" v-if="$q.screen.gt.xs">{{ props.row.status_text }}</q-badge>
             </q-td>
             <q-td key="action" :props="props" style='width:20px;'>
-              <div v-if="!operate_limit || (operate_limit && props.row.id == current.timer.item_id)">
+              <div v-if="!operate_limit || (operate_limit && props.row.id == timer.item_id)">
                 <div class="q-gutter-sm" v-if="props.row.status === 1">
                   <q-btn round color="black" size="sm" icon="play_arrow" @click.stop="$root.$emit('modalTimerOpen', {row: props.row, type: 'start'})" />
                 </div>
@@ -114,6 +114,10 @@
                 <div class="q-gutter-sm" v-else-if="props.row.status === 4">
                   <q-btn round color="black" size="sm" icon="pause" @click.stop="$root.$emit('modalTimerOpen', {row: props.row, type: 'pause'})" />
                   <q-btn round color="secondary" size="sm" icon="done" @click.stop="$root.$emit('modalTimerOpen', {row: props.row, type: 'done'})" />
+                </div>
+
+                <div class="q-gutter-sm" v-else-if="props.row.status === 5">
+                  <q-btn round color="grey" size="sm" icon="list" @click.stop="viewTimerHistory(props.row)" />
                 </div>
               </div>
             </q-td>
@@ -147,7 +151,7 @@ export default {
       status: ['undo', 'pending', 'paused', 'overing', 'done'],
       loading: false,
       pagination: {
-        sortBy: 'create_time',
+        sortBy: 'update_time',
         descending: true,
         page: 1,
         rowsPerPage: 3,
@@ -155,7 +159,7 @@ export default {
       },
       columns: [
         { name: 'is_urgent', align: 'center' },
-        { name: 'create_time', align: 'left', label: 'Task Item', field: 'create_time', sortable: true },
+        { name: 'update_time', align: 'left', label: 'Update Time', field: 'update_time', sortable: true },
         { name: 'is_top', align: 'left', label: 'Status', field: 'is_top', sortable: true },
         { name: 'action', align: 'center' }
       ],
@@ -165,7 +169,8 @@ export default {
         deadline: '',
         category: ''
       },
-      current: null
+      timers: null, // 当前timer列表
+      timer: null // 当前最后一条timer
     }
   },
   components: {
@@ -191,28 +196,31 @@ export default {
   },
   computed: {
     operate_limit(){
-      return Boolean(this.current && Object.keys(this.current).length && ( this.current.timer.type == 'start' || this.current.timer.type == 'over' ))
+      return Boolean(this.timer && Object.keys(this.timer).length && ( this.timer.type === 'start' || this.timer.type === 'over' ))
     }
   },
   methods: {
     async onRequest(props) {
       const { page, rowsPerPage, sortBy, descending } = props.pagination 
       const filter = props.filter
-
       const startRow = (page - 1) * rowsPerPage
+
       this.loading = true
       const res = await this.$axios.post('task/items', {startRow, rowsPerPage, sortBy, descending, filter})
-      const {total, lists, current} = res.data
+      const {total, lists, current_timers} = res.data
       this.data.splice(0, this.data.length, ...lists)
       this.pagination.rowsNumber = total
       this.pagination.page = page
       this.pagination.rowsPerPage = rowsPerPage
       this.pagination.sortBy = sortBy
       this.pagination.descending = descending
-      this.current = current
-      this.loading = false
+
+      // 右侧timer列表
+      this.timers = current_timers
+      this.timer = current_timers && Object.keys(current_timers).length && current_timers[Object.keys(current_timers).length - 1]
       // 设置定时器
-      // this.$root.$emit('timerStart', this.current)
+      this.$root.$emit('timerStart', {timer: this.timer, timers: this.timers})
+      this.loading = false
     },
     async changeUrgent(row) {
       const index = this.data.indexOf(row)
@@ -222,6 +230,10 @@ export default {
       await this.$axios.post('task/change/urgent', {id, is_urgent})
       this.$set(this.data[index], 'is_urgent', is_urgent)
       this.$q.loading.hide()
+      this.onRequest({
+        pagination: _.assign(this.pagination, {page: 1}),
+        filter: this.filter
+      })
     },
     async addTask() {
       // 判断deadline是否合法
@@ -272,6 +284,14 @@ export default {
           filter: this.filter
         })
       }
+    },
+    viewTimerHistory(row) {
+      const current_timers = row.timers
+      // 右侧timer列表
+      this.timers = current_timers
+      this.timer = current_timers && Object.keys(current_timers).length && current_timers[Object.keys(current_timers).length - 1]
+      // 设置定时器
+      this.$root.$emit('timerStart', {timer: this.timer, timers: this.timers})
     }
   }
 }
@@ -282,15 +302,18 @@ export default {
   background: grey;
 }
 .status_2 {
-  background: orange;
+  background: blue;
 }
 .status_3 {
-  background: brown;
+  background: orange;
 }
 .status_4 {
   background: red;
 }
 .status_5 {
   background: green;
+}
+.tr_current_highlight {
+  background: #ebf5eb;
 }
 </style>

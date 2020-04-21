@@ -71,7 +71,7 @@ export default {
   methods: {
     async init(){
         if(this.value){
-            const res = await this.$axios.post('task/categories', {search: this.value.title})
+            const res = await this.$axios.post('task/get/categories', {search: this.value.title})
             this.categoryOptions = res.data
             this.categorySelected = this.value
         }
@@ -86,7 +86,7 @@ export default {
     async getCategories(val, update, abort) {
         let categoryOptions = []
         if(val == '' && this.categories.length == 0){
-            const res = await this.$axios.post('task/categories', {search: val})
+            const res = await this.$axios.post('task/get/categories', {search: val})
             this.categories = categoryOptions = res.data
         }else{
             if(val == '') {
@@ -98,7 +98,7 @@ export default {
                 categoryOptions = temp
             }else{
                 // 异步加载数据，若有数据则加入categories列表
-                const res = await this.$axios.post('task/categories', {search: val})
+                const res = await this.$axios.post('task/get/categories', {search: val})
                 if(res.data.length) _.merge(this.categories, res.data)
                 categoryOptions = res.data
             }
