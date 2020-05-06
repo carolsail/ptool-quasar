@@ -1,8 +1,42 @@
 <template>
   <Task>
     <q-scroll-area slot="drawer" class="fit">
-      <div class="q-pa-md">
-        task list...
+      <div class="q-pa-md task-list" v-if="tasks.length">
+        <q-list bordered class="rounded-borders">
+          <q-expansion-item
+            v-for="(task, key) in tasks"
+            expand-separator
+            icon="alarm"
+            :label="task.title"
+            :key="key"
+          >
+            <q-card v-if="task.timers.length">
+              <q-card-section no-padding>
+                <q-timeline color="secondary">
+                  <template v-for="(item, key) in task.timers">
+                    <q-timeline-entry :key="key" v-if="item.type=='start'" :title="item.start | parseTime('{h}:{i}')" :subtitle="item.start | parseTime('{y}-{m}-{d}')" icon="play_arrow">
+                        <div class="remark">{{item.remark}}</div>
+                    </q-timeline-entry>
+                    <q-timeline-entry :key="key" v-if="item.type=='pause'" :title="item.start | parseTime('{h}:{i}')" :subtitle="item.start | parseTime('{y}-{m}-{d}')" icon="pause">
+                      <div class="remark">{{item.remark}}</div>
+                    </q-timeline-entry>
+                    <q-timeline-entry :key="key" v-if="item.type=='over'" :title="item.start | parseTime('{h}:{i}')" :subtitle="item.start | parseTime('{y}-{m}-{d}')" icon="priority_high">
+                        <div class="remark">{{item.remark}}</div>
+                    </q-timeline-entry>
+                    <q-timeline-entry :key="key" v-if="item.type=='done'" :title="item.start | parseTime('{h}:{i}')" :subtitle="item.start | parseTime('{y}-{m}-{d}')" icon="flag">
+                      <div class="remark">{{item.remark}}</div>
+                    </q-timeline-entry>
+                  </template>
+                </q-timeline>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </div>
+      <div class="q-pa-md" v-else>
+        <q-card>
+          <q-card-section>no timeline list</q-card-section>
+        </q-card>
       </div>
     </q-scroll-area>
 
@@ -71,7 +105,7 @@
               </q-item>
             </q-td>
             <q-td key="tasks" :props="props" style='width:20px;'>
-              <q-btn round color="primary" size="sm" icon="list" />
+              <q-btn round color="primary" size="sm" icon="list" @click.stop="viewTaskHistory(props.row)" />
             </q-td>
           </q-tr>
         </template>
@@ -110,7 +144,8 @@ export default {
       data: [],
       category: {
         title: ''
-      }
+      },
+      tasks: []
     }
   },
   components: {
@@ -191,7 +226,23 @@ export default {
       //   pagination: _.assign(this.pagination, {page: 1}),
       //   filter: this.filter
       // })
+    },
+    viewTaskHistory(row){
+      this.tasks = row.items
+      console.log(this.tasks)
     }
   }
 }
 </script>
+
+<style>
+.task-list .q-item__label{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+}
+.task-list .remark{
+  word-break: break-all;
+}
+</style>

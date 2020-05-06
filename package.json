@@ -11,12 +11,12 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@chenfengyuan/vue-countdown": "^1.1.5",
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
     "lodash": "^4.17.15",
     "portal-vue": "^2.1.7",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "vue-native-notification": "^1.0.5"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0"

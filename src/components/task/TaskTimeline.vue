@@ -1,9 +1,9 @@
 <template>
     <q-timeline color="secondary" v-if="timer">
         <q-timeline-entry heading tag="h4">
-            <countdown v-if="timer.type=='start'" :time="seconds * 1000" @end="end">
-                <template slot-scope="props">{{ props.hours }}h {{ props.minutes }}m {{ props.seconds }}s</template>
-            </countdown>
+            <span v-if="timer.type=='start'">
+                {{ seconds | formatSeconds('{h}h:{i}m:{s}s')}}
+            </span>
 
             <span v-else-if="timer.type=='over'" class='text-negative'>
                 {{ seconds | formatSeconds('{h}h:{i}m:{s}s')}}
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+let interval = null
 export default {
     name: 'TaskTimeline',
     data(){
@@ -45,39 +46,46 @@ export default {
             counting: false,
             timer: null,
             timers: null,
-            interval: null,
             seconds: 0,
             tip_text: ''
         }
     },
     created(){
+        this.$root.$off('timerStart')
         this.$root.$on('timerStart', (obj)=>{
             this.init(obj)
-            this.start()
         })
     },
     methods: {
         init(obj){
-            if(this.interval) clearInterval(this.interval)
+            if(interval) clearInterval(interval)
             this.seconds = 0
             this.timer = obj.timer
             this.timers = obj.timers
+            this.start()
         },
         start(){
             const now = Date.parse(new Date()) / 1000
 
-            if(this.timer && this.timer.type=='start'){
-                const seconds = this.timer.start + this.timer.duration - now
-                this.seconds = seconds
-            }
-
-            if(this.timer && this.timer.type=='over'){
-                const seconds = this.timer.start + this.timer.duration - now
-                this.seconds = Math.abs(seconds)
-                this.interval = setInterval(()=>{
-                    this.seconds++
+            if((this.timer && this.timer.type=='start') || (this.timer && this.timer.type=='over')){
+                let seconds = this.timer.start + this.timer.duration - now
+                this.seconds = seconds < 0 ? Math.abs(seconds) : seconds
+                interval = setInterval(()=>{
+                   seconds--
+                   if(seconds == 0) {
+                       this.end()
+                   }
+                   this.seconds = seconds < 0 ? Math.abs(seconds) : seconds
                 }, 1000)
             }
+
+            // if(this.timer && this.timer.type=='over'){
+            //     const seconds = this.timer.start + this.timer.duration - now
+            //     this.seconds = Math.abs(seconds)
+            //     this.interval = setInterval(()=>{
+            //         this.seconds++
+            //     }, 1000)
+            // }
 
             if(this.timer && this.timer.type=='pause'){
                 this.tip_text = this.timer.duration < 0 ? 'Time out' : 'Remaining'
@@ -94,9 +102,13 @@ export default {
             }
         },
         end(){
-            setTimeout(()=>{
+            this.$notification.show('Timer Over', {
+                body: "Hey Dear! You've been notified!"
+            }, {})
+
+            setTimeout(() => {
                 this.$root.$emit('reloadRequest')
-            }, 500)
+            }, 500);
         }
     }
 }
