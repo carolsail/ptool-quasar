@@ -15,7 +15,10 @@
           <q-avatar size="56px" class="q-mb-sm">
             <img src="~assets/girl-avatar.png">
           </q-avatar>
-          <div class="text-weight-bold">{{$store.getters['auth/nickname']}}</div>
+          <div class="text-weight-bold">
+            <span>{{$store.getters['auth/nickname']}}</span>
+            <q-btn flat icon="input" class="q-ml-md" @click="logout" />
+          </div>
         </div>
       </q-img>
     </q-drawer>
@@ -53,6 +56,15 @@ export default {
     this.$root.$on('toggleLeftDrawer', ()=>{
       this.leftDrawerOpen = !this.leftDrawerOpen
     })
+  },
+  methods: {
+    logout(){
+      this.$q.loading.show()
+      this.$store.dispatch('auth/resetToken').then(() =>{
+         this.$router.push({ path: '/login' })
+         this.$q.loading.hide()
+      })
+    }
   }
 }
 </script>

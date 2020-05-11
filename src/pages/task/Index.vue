@@ -79,7 +79,7 @@
             <q-td key="update_time" :props="props" @click="$root.$emit('modalTaskItemOpen', props.row)" class="cursor-pointer">
               <q-item>
                 <q-item-section>
-                  <q-item-label class="overlflow" style="width:100px;">{{ props.row.title }}</q-item-label>
+                  <q-item-label class="ellipsis" style="width:100px;">{{ props.row.title }}</q-item-label>
                   <q-item-label caption lines="2">
                     <span class="text-positive">{{ props.row.create_time | parseTime('{y}-{m}-{d}') }}</span>
                   </q-item-label>
