@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import taskApi from '../../api/task'
 export default {
   name: 'AutoCompleteCategories',
   data(){
@@ -71,9 +72,13 @@ export default {
   methods: {
     async init(){
         if(this.value){
-            const res = await this.$axios.post('task/get/categories', {search: this.value.title})
-            this.categoryOptions = res.data
-            this.categorySelected = this.value
+            try{
+                const res = await taskApi.categorySearchByTitle(this.value.title)
+                this.categoryOptions = res.data
+                this.categorySelected = this.value
+            }catch(error){
+                console.log(error)
+            }
         }
     },
     changeInput(){
@@ -84,29 +89,33 @@ export default {
         this.$emit('input', this.categorySelected)
     },
     async getCategories(val, update, abort) {
-        let categoryOptions = []
-        if(val == '' && this.categories.length == 0){
-            const res = await this.$axios.post('task/get/categories', {search: val})
-            this.categories = categoryOptions = res.data
-        }else{
-            if(val == '') {
-            categoryOptions = _.cloneDeep(this.categories)
+        try{
+            let categoryOptions = []
+            if(val == '' && this.categories.length == 0){
+                const res = await taskApi.categorySearchByTitle(val)
+                this.categories = categoryOptions = res.data
             }else{
-            // 先从categories对象中找， 如果存在直接返回，不存在再进行异步加载
-            const temp = _.filter(this.categories, item => _.includes(item.title, val))
-            if(temp.length){
-                categoryOptions = temp
-            }else{
-                // 异步加载数据，若有数据则加入categories列表
-                const res = await this.$axios.post('task/get/categories', {search: val})
-                if(res.data.length) _.merge(this.categories, res.data)
-                categoryOptions = res.data
+                if(val == '') {
+                categoryOptions = _.cloneDeep(this.categories)
+                }else{
+                // 先从categories对象中找， 如果存在直接返回，不存在再进行异步加载
+                const temp = _.filter(this.categories, item => _.includes(item.title, val))
+                if(temp.length){
+                    categoryOptions = temp
+                }else{
+                    // 异步加载数据，若有数据则加入categories列表
+                    const res = await taskApi.categorySearchByTitle(val)
+                    if(res.data.length) _.merge(this.categories, res.data)
+                    categoryOptions = res.data
+                }
+                }
             }
-            }
+            update(() => {
+                this.categoryOptions = categoryOptions
+            })
+        }catch(error){
+            console.log(error)
         }
-        update(() => {
-            this.categoryOptions = categoryOptions
-        })
     }
   }
 }

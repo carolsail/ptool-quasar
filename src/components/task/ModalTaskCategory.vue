@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import taskApi from '../../api/task'
 export default {
   name: 'ModalTaskCategory',
   data(){
@@ -51,17 +52,25 @@ export default {
   },
   methods: {
     async updateCategory() {
-      const res = await this.$axios.post('task/category/update', this.category)
-      if(res.status){
-        this.isOpen = !this.isOpen
-        this.$root.$emit('reloadRequest')
+      try{
+        const res = await taskApi.categoryUpdate(this.category)
+        if(res.status){
+          this.isOpen = !this.isOpen
+          this.$root.$emit('reloadRequest')
+        }
+      }catch(error){
+        console.log(error)
       }
     },
     async deleteCategory() {
-      const res = await this.$axios.post('task/category/delete', {id: this.category.id})
-      if(res.status){
-        this.isOpen = !this.isOpen
-        this.$root.$emit('reloadRequest')
+      try{
+        const res = await taskApi.categoryDelete(this.category.id)
+        if(res.status){
+          this.isOpen = !this.isOpen
+          this.$root.$emit('reloadRequest')
+        }
+      }catch(error){
+        console.log(error)
       }
     }
   }

@@ -1,27 +1,19 @@
-import Vue from 'vue'
-import { removeToken, setToken } from "../../utils/auth"
+import { removeToken, setToken } from "../../utils/token"
+import apiAuth from '../../api/auth'
 
 export function login ({ commit }, {payload}) {
     const { account, password } = payload
-    return new Promise((resolve, reject)=>{
-        Vue.prototype.$axios.post('auth/login', {account: account.trim(), password}).then(response=>{
-            commit('setToken', { token: response.data })
-            setToken(response.data)
-            resolve(response)
-        }).catch(error=>{
-            reject(error)
-        })
+    return apiAuth.login(account.trim(), password).then(response=>{
+        commit('setToken', { token: response.data })
+        setToken(response.data)
+        return response
     })
 }
 
 export function getInfo({ commit }) {
-    return new Promise((resolve, reject)=>{
-        Vue.prototype.$axios.get('auth/verify').then(response=>{
-            commit('setNickname', { nickname:  response.data.nickname})
-            resolve(response)
-        }).catch(error=>{
-            reject(error)
-        })
+    return apiAuth.info().then(response=>{
+        commit('setNickname', { nickname:  response.data.nickname})
+        return response
     })
 }
 

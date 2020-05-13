@@ -1,7 +1,6 @@
-import Vue from 'vue'
 import axios from 'axios'
 import { Store } from '../store'
-import { getToken } from 'src/utils/auth'
+import { getToken } from './token'
 import { Dialog } from 'quasar'
 import { Notify } from 'quasar'
 
@@ -42,9 +41,10 @@ axiosInstance.interceptors.response.use(response=>{
                     { icon: 'close', color: 'white', handler: () => {} }
                 ]
             })
+            return Promise.reject(res)
         }
     }
     return res
 })
 
-Vue.prototype.$axios = axiosInstance
+export default axiosInstance

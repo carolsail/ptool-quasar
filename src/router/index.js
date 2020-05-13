@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import routes from './routes'
-import { getToken } from '../utils/auth'
+import { getToken } from '../utils/token'
 import { Store } from '../store'
 
 Vue.use(VueRouter)
@@ -41,8 +41,12 @@ export default function (/* { store, ssrContext } */) {
           next()
         }else{
           // 获取用户信息
-          await Store.dispatch('auth/getInfo')
-          next()
+          try{
+            await Store.dispatch('auth/getInfo')
+            next()
+          }catch(error){
+            console.log(error, '用户信息获取失败')
+          }
         }
       }
     } else {

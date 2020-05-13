@@ -133,6 +133,7 @@
 
 <script>
 import _ from 'lodash'
+import taskApi from '../../api/task'
 import Task from 'components/task/Task'
 import ModalTaskItem from 'components/task/ModalTaskItem'
 import ModalTimer from 'components/task/ModalTimer'
@@ -201,39 +202,47 @@ export default {
   },
   methods: {
     async onRequest(props) {
-      const { page, rowsPerPage, sortBy, descending } = props.pagination 
-      const filter = props.filter
-      const startRow = (page - 1) * rowsPerPage
-
-      this.loading = true
-      const res = await this.$axios.post('task/items', {startRow, rowsPerPage, sortBy, descending, filter})
-      const {total, lists, current_timers} = res.data
-      this.data.splice(0, this.data.length, ...lists)
-      this.pagination.rowsNumber = total
-      this.pagination.page = page
-      this.pagination.rowsPerPage = rowsPerPage
-      this.pagination.sortBy = sortBy
-      this.pagination.descending = descending
-
-      // 右侧timer列表
-      this.timers = current_timers
-      this.timer = current_timers && Object.keys(current_timers).length && current_timers[Object.keys(current_timers).length - 1]
-      // 设置定时器
-      this.$root.$emit('timerStart', {timer: this.timer, timers: this.timers})
-      this.loading = false
+      try{
+        const { page, rowsPerPage, sortBy, descending } = props.pagination 
+        const filter = props.filter
+        const startRow = (page - 1) * rowsPerPage
+  
+        this.loading = true
+        const res = await taskApi.itemLists(startRow, rowsPerPage, sortBy, descending, filter)
+        const {total, lists, current_timers} = res.data
+        this.data.splice(0, this.data.length, ...lists)
+        this.pagination.rowsNumber = total
+        this.pagination.page = page
+        this.pagination.rowsPerPage = rowsPerPage
+        this.pagination.sortBy = sortBy
+        this.pagination.descending = descending
+  
+        // 右侧timer列表
+        this.timers = current_timers
+        this.timer = current_timers && Object.keys(current_timers).length && current_timers[Object.keys(current_timers).length - 1]
+        // 设置定时器
+        this.$root.$emit('timerStart', {timer: this.timer, timers: this.timers})
+        this.loading = false
+      }catch(error){
+        console.log(error)
+      }
     },
     async changeUrgent(row) {
-      const index = this.data.indexOf(row)
-      const id = row['id']
-      const is_urgent = row['is_urgent'] == 0 ? 1 : 0
-      this.$q.loading.show()
-      await this.$axios.post('task/change/urgent', {id, is_urgent})
-      this.$set(this.data[index], 'is_urgent', is_urgent)
-      this.$q.loading.hide()
-      this.onRequest({
-        pagination: _.assign(this.pagination, {page: 1}),
-        filter: this.filter
-      })
+      try{
+        const index = this.data.indexOf(row)
+        const id = row['id']
+        const is_urgent = row['is_urgent'] == 0 ? 1 : 0
+        this.$q.loading.show()
+        await taskApi.itemChangeUrgent(id, is_urgent)
+        this.$set(this.data[index], 'is_urgent', is_urgent)
+        this.$q.loading.hide()
+        this.onRequest({
+          pagination: _.assign(this.pagination, {page: 1}),
+          filter: this.filter
+        })
+      }catch(error){
+        console.log(error)
+      }
     },
     async addTask() {
       // 判断deadline是否合法
@@ -262,27 +271,31 @@ export default {
         })
         return
       }
-      this.$q.loading.show()
-      const res = await this.$axios.post('task/item/add', this.task)
-      this.$q.loading.hide()
-      if(res.status){
-        this.$q.notify({
-            color: 'positive',
-            position: 'top-right',
-            message: res.data,
-            actions: [
-                { icon: 'close', color: 'white', handler: () => {} }
-            ]
-        })
-        this.task = {
-          title: '',
-          deadline: '',
-          category: ''
+      try{
+        this.$q.loading.show()
+        const res = await taskApi.itemAdd(this.task)
+        this.$q.loading.hide()
+        if(res.status){
+          this.$q.notify({
+              color: 'positive',
+              position: 'top-right',
+              message: res.data,
+              actions: [
+                  { icon: 'close', color: 'white', handler: () => {} }
+              ]
+          })
+          this.task = {
+            title: '',
+            deadline: '',
+            category: ''
+          }
+          this.onRequest({
+            pagination: _.assign(this.pagination, {page: 1}),
+            filter: this.filter
+          })
         }
-        this.onRequest({
-          pagination: _.assign(this.pagination, {page: 1}),
-          filter: this.filter
-        })
+      }catch(error){
+        console.log(error)
       }
     },
     viewTimerHistory(row) {

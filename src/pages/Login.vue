@@ -42,10 +42,10 @@ export default {
   methods: {
       onSubmit(){
         this.$q.loading.show()
-        this.$store.dispatch('auth/login', { payload: this.formData }).then(()=>{
+        this.$store.dispatch('auth/login', { payload: this.formData }).then(response=>{
             this.$router.push({ path: this.redirect || '/' })
             this.$q.loading.hide()
-        }).catch(()=>{
+        }).catch(error=>{
             this.$q.loading.hide()
         })
       }

@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import taskApi from '../../api/task'
 import { parseTime } from 'src/utils/time.js'
 import AutoCompleteCategories from 'src/components/task/AutoCompleteCategories'
 import DatePicker from 'src/components/DatePicker'
@@ -62,17 +63,25 @@ export default {
   },
   methods: {
     async updateTask() {
-      const res = await this.$axios.post('task/item/update', this.task)
-      if(res.status){
-        this.isOpen = !this.isOpen
-        this.$root.$emit('reloadRequest')
+      try{
+        const res = await taskApi.itemUpdate(this.task)
+        if(res.status){
+          this.isOpen = !this.isOpen
+          this.$root.$emit('reloadRequest')
+        }
+      }catch(error){
+        console.log(error)
       }
     },
     async deleteTask() {
-      const res = await this.$axios.post('task/item/delete', {id: this.task.id})
-      if(res.status){
-        this.isOpen = !this.isOpen
-        this.$root.$emit('reloadRequest')
+      try{
+        const res = await taskApi.itemDelete(this.task.id)
+        if(res.status){
+          this.isOpen = !this.isOpen
+          this.$root.$emit('reloadRequest')
+        }
+      }catch(error){
+        console.log(error)
       }
     }
   }

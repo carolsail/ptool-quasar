@@ -48,6 +48,7 @@
     </q-dialog>
 </template>
 <script>
+import taskApi from '../../api/task'
 export default {
     name: 'ModalTimer',
     data(){
@@ -91,27 +92,31 @@ export default {
     },
     methods: {
       async submit(){
-        this.$q.loading.show()
-        const res = await this.$axios.post('task/timer/add', this.timer)
-        this.$q.loading.hide()
-        if(res.status){
-          this.$q.notify({
-              color: 'positive',
-              position: 'top-right',
-              message: res.data,
-              actions: [
-                  { icon: 'close', color: 'white', handler: () => {} }
-              ]
-          })
-          this.isOpen = !this.isOpen
-          this.timer = {
-              item: null,
-              type: null,
-              hours: null,
-              minutes: null,
-              remark: null
+        try{
+          this.$q.loading.show()
+          const res = await taskApi.timerAdd(this.timer)
+          this.$q.loading.hide()
+          if(res.status){
+            this.$q.notify({
+                color: 'positive',
+                position: 'top-right',
+                message: res.data,
+                actions: [
+                    { icon: 'close', color: 'white', handler: () => {} }
+                ]
+            })
+            this.isOpen = !this.isOpen
+            this.timer = {
+                item: null,
+                type: null,
+                hours: null,
+                minutes: null,
+                remark: null
+            }
+            this.$root.$emit('reloadRequest', {pagination:{page:1}})
           }
-          this.$root.$emit('reloadRequest', {pagination:{page:1}})
+        }catch(error){
+          console.log(error)
         }
       }
     }

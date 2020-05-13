@@ -118,6 +118,7 @@
 
 <script>
 import _ from 'lodash'
+import taskApi from '../../api/task'
 import Task from 'components/task/Task'
 import ModalTaskCategory from 'components/task/ModalTaskCategory'
 export default {
@@ -170,17 +171,20 @@ export default {
       const { page, rowsPerPage, sortBy, descending } = props.pagination 
       const filter = props.filter
       const startRow = (page - 1) * rowsPerPage
-
-      this.loading = true
-      const res = await this.$axios.post('task/categories', {startRow, rowsPerPage, sortBy, descending, filter})
-      const {total, lists} = res.data
-      this.data.splice(0, this.data.length, ...lists)
-      this.pagination.rowsNumber = total
-      this.pagination.page = page
-      this.pagination.rowsPerPage = rowsPerPage
-      this.pagination.sortBy = sortBy
-      this.pagination.descending = descending
-      this.loading = false
+      try{
+        this.loading = true
+        const res = await taskApi.categoryLists(startRow, rowsPerPage, sortBy, descending, filter)
+        const {total, lists} = res.data
+        this.data.splice(0, this.data.length, ...lists)
+        this.pagination.rowsNumber = total
+        this.pagination.page = page
+        this.pagination.rowsPerPage = rowsPerPage
+        this.pagination.sortBy = sortBy
+        this.pagination.descending = descending
+        this.loading = false
+      }catch(error){
+        console.log(error)
+      }
     },
     async addCategory(){
       // 判断title是否存在
@@ -195,37 +199,45 @@ export default {
         })
         return
       }
-      this.$q.loading.show()
-      const res = await this.$axios.post('task/category/add', this.category)
-      this.$q.loading.hide()
-      if(res.status){
-        this.$q.notify({
-            color: 'positive',
-            position: 'top-right',
-            message: res.data,
-            actions: [
-                { icon: 'close', color: 'white', handler: () => {} }
-            ]
-        })
-        this.category = { title: '' }
-        this.onRequest({
-          pagination: _.assign(this.pagination, {page: 1}),
-          filter: this.filter
-        })
+      try{
+        this.$q.loading.show()
+        const res = await taskApi.categoryAdd(this.category)
+        this.$q.loading.hide()
+        if(res.status){
+          this.$q.notify({
+              color: 'positive',
+              position: 'top-right',
+              message: res.data,
+              actions: [
+                  { icon: 'close', color: 'white', handler: () => {} }
+              ]
+          })
+          this.category = { title: '' }
+          this.onRequest({
+            pagination: _.assign(this.pagination, {page: 1}),
+            filter: this.filter
+          })
+        }
+      }catch(error){
+        console.log(error)
       }
     },
     async changeActive(row){
       const index = this.data.indexOf(row)
       const id = row['id']
       const is_active = row['is_active'] ? 1 : 0
-      this.$q.loading.show()
-      await this.$axios.post('task/change/active', {id, is_active})
-      this.$set(this.data[index], 'is_active', row['is_active'])
-      this.$q.loading.hide()
-      // this.onRequest({
-      //   pagination: _.assign(this.pagination, {page: 1}),
-      //   filter: this.filter
-      // })
+      try{
+        this.$q.loading.show()
+        await taskApi.categoryChangeActive(id, is_active)
+        this.$set(this.data[index], 'is_active', row['is_active'])
+        this.$q.loading.hide()
+        // this.onRequest({
+        //   pagination: _.assign(this.pagination, {page: 1}),
+        //   filter: this.filter
+        // })
+      }catch(error){
+        console.log(error)
+      }
     },
     viewTaskHistory(row){
       this.tasks = row.items
