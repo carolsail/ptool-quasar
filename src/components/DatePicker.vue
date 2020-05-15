@@ -85,8 +85,9 @@ export default {
         },
         optionsFn(date){
             if(this.options){
+                // 选择日期需大于当日
                 const timestamp = Date.parse(new Date())
-                return date >= parseTime(timestamp, '{y}/{m}/{d}')
+                return date > parseTime(timestamp, '{y}/{m}/{d}')
             }
             return true
         }

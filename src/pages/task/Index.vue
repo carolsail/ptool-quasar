@@ -225,6 +225,7 @@ export default {
         this.loading = false
       }catch(error){
         console.log(error)
+        this.loading = false
       }
     },
     async changeUrgent(row) {
@@ -242,6 +243,7 @@ export default {
         })
       }catch(error){
         console.log(error)
+        this.$q.loading.hide()
       }
     },
     async addTask() {
@@ -296,6 +298,7 @@ export default {
         }
       }catch(error){
         console.log(error)
+        this.$q.loading.hide()
       }
     },
     viewTimerHistory(row) {

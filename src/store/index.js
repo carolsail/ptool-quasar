@@ -2,12 +2,14 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import auth from './auth'
+import deadline from './deadline'
 
 Vue.use(Vuex)
 
 const Store = new Vuex.Store({
   modules: {
-    auth
+    auth,
+    deadline
   },
 
   // enable strict mode (adds overhead!)

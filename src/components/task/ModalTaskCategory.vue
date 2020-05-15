@@ -2,7 +2,7 @@
     <q-dialog v-model="isOpen">
       <q-card style="width:700px;">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{title}}</div>
+          <div class="text-h6 ellipsis" style="width:80%;">{{title}}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>

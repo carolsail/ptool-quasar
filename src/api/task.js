@@ -39,5 +39,15 @@ export default {
     //========== task timer =========
     timerAdd(data){
         return http.post('task/timer/add', data)
+    },
+    //========== task deadline =========
+    deadlineMark(){
+        return http.get('task/deadline/mark')
+    },
+    deadlineLists(){
+        return http.get('task/deadlines')
+    },
+    deadlineCheck(id){
+        return http.post('task/deadline/change/check', {id})
     }
 }

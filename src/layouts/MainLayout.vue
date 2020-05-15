@@ -17,7 +17,7 @@
           </q-avatar>
           <div class="text-weight-bold">
             <span>{{$store.getters['auth/nickname']}}</span>
-            <q-btn flat icon="input" class="q-ml-md" @click="logout" />
+            <q-btn flat icon="exit_to_app" class="q-ml-md" @click="logout" />
           </div>
         </div>
       </q-img>
@@ -30,7 +30,11 @@
 </template>
 
 <script>
+import taskApi from '../api/task'
 import Menu from 'components/Menu'
+import dayjs from 'dayjs'
+
+let interval_deadline_mark = null
 
 export default {
   name: 'MainLayout',
@@ -46,7 +50,13 @@ export default {
         {
           title: 'Tasks',
           caption: 'task timer',
-          icon: 'school',
+          icon: 'notifications_active',
+          link: '/'
+        },
+        {
+          title: 'Sheets',
+          caption: 'sheet deal',
+          icon: 'pie_chart',
           link: '/'
         }
       ]
@@ -56,6 +66,18 @@ export default {
     this.$root.$on('toggleLeftDrawer', ()=>{
       this.leftDrawerOpen = !this.leftDrawerOpen
     })
+    // 更新deadline信息
+    this.deadlineMark()
+    if(!interval_deadline_mark){
+      interval_deadline_mark = setInterval(()=>{
+        let pdm = localStorage.getItem('ptool_deadline_mark') || 0
+        let now = dayjs().startOf('day').valueOf()
+        if(now > pdm){
+          console.log('start interval deadline mark...')
+          this.deadlineMark()
+        }
+      }, 5000)
+    }
   },
   methods: {
     logout(){
@@ -63,6 +85,15 @@ export default {
       this.$store.dispatch('auth/resetToken').then(() =>{
          this.$router.push({ path: '/login' })
          this.$q.loading.hide()
+      })
+    },
+    deadlineMark(){
+      taskApi.deadlineMark().then(response=>{
+        if(response.status){
+          this.$root.$emit('getDeadlines')
+          // 保存当天0点的时间戳如：2020-05-15 00:00:00
+          localStorage.setItem('ptool_deadline_mark', dayjs().startOf('day').valueOf())
+        }
       })
     }
   }

@@ -184,6 +184,7 @@ export default {
         this.loading = false
       }catch(error){
         console.log(error)
+        this.loading = false
       }
     },
     async addCategory(){
@@ -220,6 +221,7 @@ export default {
         }
       }catch(error){
         console.log(error)
+        this.$q.loading.hide()
       }
     },
     async changeActive(row){
@@ -237,6 +239,7 @@ export default {
         // })
       }catch(error){
         console.log(error)
+        this.$q.loading.hide()
       }
     },
     viewTaskHistory(row){

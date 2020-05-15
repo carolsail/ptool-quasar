@@ -117,6 +117,7 @@ export default {
           }
         }catch(error){
           console.log(error)
+          this.$q.loading.hide()
         }
       }
     }

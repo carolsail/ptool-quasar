@@ -13,6 +13,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.18.1",
+    "dayjs": "^1.8.27",
     "lodash": "^4.17.15",
     "portal-vue": "^2.1.7",
     "quasar": "^1.0.0",
