@@ -10,6 +10,7 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/task/Index.vue') },
       { path: '/task-category', component: () => import('pages/task/Category.vue') },
+      { path: '/sheet', component: () => import('pages/sheet/Index.vue') }
     ]
   }
 ]

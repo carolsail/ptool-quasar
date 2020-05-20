@@ -5,6 +5,6 @@ export default {
         return http.post('auth/login', {account, password})
     },
     info(){
-        return http.get('auth/verify')
+        return http.get('auth/info')
     }
 }

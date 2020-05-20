@@ -3,9 +3,10 @@ import { Store } from '../store'
 import { getToken } from './token'
 import { Dialog } from 'quasar'
 import { Notify } from 'quasar'
+import Config from './config'
 
 const axiosInstance = axios.create({
-    baseURL: 'http://192.168.1.192/ptool/public/',
+    baseURL: Config.apiUrl,
     timeout: 5000
 })
 
@@ -20,31 +21,30 @@ axiosInstance.interceptors.request.use(config=>{
 
 // 响应拦截器
 axiosInstance.interceptors.response.use(response=>{
-    const res = response.data
-    if(res.code !== 20000){
-        if(res.code === 10010 || res.code === 10011){
-          Dialog.create({
-              title: 'Tips',
-              message: 'You have been logged out'
-          }).onDismiss(() => {
-            Store.dispatch('auth/resetToken').then(() =>{
-                location.reload()
-            })
+    return response.data
+}, error=>{
+    const res = error.response.data
+    if(res.error_code === 10010 || res.error_code === 10011){
+        Dialog.create({
+            title: 'Tips',
+            message: 'You have been logged out'
+        }).onDismiss(() => {
+          Store.dispatch('auth/resetToken').then(() =>{
+              location.reload()
           })
-        }else{
-            //请求失败的情况 code = 40000
-            Notify.create({
-                color: 'negative',
-                position: 'top-right',
-                message: res.data,
-                actions: [
-                    { icon: 'close', color: 'white', handler: () => {} }
-                ]
-            })
-            return Promise.reject(res)
-        }
-    }
-    return res
+        })
+      }else{
+          //请求失败的情况 code = 40000
+          Notify.create({
+              color: 'negative',
+              position: 'top-right',
+              message: res.msg,
+              actions: [
+                  { icon: 'close', color: 'white', handler: () => {} }
+              ]
+          })
+          return Promise.reject(res)
+      }
 })
 
 export default axiosInstance

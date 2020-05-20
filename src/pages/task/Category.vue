@@ -205,14 +205,6 @@ export default {
         const res = await taskApi.categoryAdd(this.category)
         this.$q.loading.hide()
         if(res.status){
-          this.$q.notify({
-              color: 'positive',
-              position: 'top-right',
-              message: res.data,
-              actions: [
-                  { icon: 'close', color: 'white', handler: () => {} }
-              ]
-          })
           this.category = { title: '' }
           this.onRequest({
             pagination: _.assign(this.pagination, {page: 1}),

@@ -57,7 +57,7 @@ export default {
           title: 'Sheets',
           caption: 'sheet deal',
           icon: 'pie_chart',
-          link: '/'
+          link: '/sheet'
         }
       ]
     }

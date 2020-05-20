@@ -97,14 +97,6 @@ export default {
           const res = await taskApi.timerAdd(this.timer)
           this.$q.loading.hide()
           if(res.status){
-            this.$q.notify({
-                color: 'positive',
-                position: 'top-right',
-                message: res.data,
-                actions: [
-                    { icon: 'close', color: 'white', handler: () => {} }
-                ]
-            })
             this.isOpen = !this.isOpen
             this.timer = {
                 item: null,

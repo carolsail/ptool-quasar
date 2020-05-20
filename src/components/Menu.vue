@@ -3,6 +3,7 @@
     clickable
     :to="link"
     exact
+    @click="$q.screen.gt.xs && $root.$emit('toggleLeftDrawer')"
   >
     <q-item-section
       v-if="icon"

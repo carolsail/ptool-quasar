@@ -278,14 +278,6 @@ export default {
         const res = await taskApi.itemAdd(this.task)
         this.$q.loading.hide()
         if(res.status){
-          this.$q.notify({
-              color: 'positive',
-              position: 'top-right',
-              message: res.data,
-              actions: [
-                  { icon: 'close', color: 'white', handler: () => {} }
-              ]
-          })
           this.task = {
             title: '',
             deadline: '',
