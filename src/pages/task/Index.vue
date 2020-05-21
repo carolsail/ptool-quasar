@@ -248,7 +248,7 @@ export default {
     },
     async addTask() {
       // 判断deadline是否合法
-      if(this.task.deadline != ''){
+      if(this.task.deadline && this.task.deadline != ''){
         if(!(/^-?[\d]+\/[0-1]\d\/[0-3]\d$/.test(this.task.deadline))){
           this.$q.notify({
               color: 'negative',
